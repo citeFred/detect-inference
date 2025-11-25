@@ -6,6 +6,7 @@ import numpy as np
 import io
 import librosa
 from PIL import Image
+from fastapi.middleware.cors import CORSMiddleware
 
 # ==========================================
 # [설정] 이미지 모델의 입력 크기 (가로, 세로)
@@ -133,6 +134,24 @@ async def lifespan(app: FastAPI):
     print("모든 모델 리소스 해제 완료.")
 
 app = FastAPI(lifespan=lifespan)
+
+# ==========================================
+# [추가] CORS 설정 (필수)
+# NestJS(백엔드)나 React(프론트)에서 요청을 보낼 수 있게 허용
+# ==========================================
+origins = [
+    "http://localhost:3000", # React (보통 3000번 포트)
+    "http://localhost:4000", # NestJS (보통 4000번 포트? - 사용자 환경에 맞게)
+    "*"                      # 개발 중에는 모든 곳 허용 (권장)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # 모든 오리진 허용
+    allow_credentials=True,
+    allow_methods=["*"],      # 모든 메소드 허용 (GET, POST 등)
+    allow_headers=["*"],      # 모든 헤더 허용
+)
 
 @app.get("/")
 def read_root():
